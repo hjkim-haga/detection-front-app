@@ -14,8 +14,10 @@
  */
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 
 const int ocr = 0;
 const int cfr = 1;
@@ -23,8 +25,11 @@ const int obj = 1;
 
 /// button:[0, 1, 2], protocol: ['rpc', 'api']
 Future<http.Response> fetchInference(
-    int button, String resource, String protocol) async {
+    int button, XFile resource, String protocol) async {
   const String address = 'http://211.184.186.118:8000/';
+
+  // Encode the image.
+  print('type: ${resource.readAsBytes().runtimeType}');
 
   // New method: trying.
   Map<String, String> headers = {
@@ -37,7 +42,7 @@ Future<http.Response> fetchInference(
     headers: headers,
     body: jsonEncode({
       'button': button,
-      'rsc': resource,
+      'rsc': base64Encode(await File(resource.path).readAsBytesSync()),
       'protocol': protocol,
     }),
   );

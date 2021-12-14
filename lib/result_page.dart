@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:my_first_flutter/audio_source.dart';
 
 class ResultPage extends StatefulWidget {
   final Uint8List result;
@@ -14,9 +15,7 @@ class ResultPage extends StatefulWidget {
 
 class _ResultPageState extends State<ResultPage> {
   AudioPlayer player = AudioPlayer();
-
   bool isPlaying = false;
-
   IconData playingIcon = Icons.play_circle_outline;
 
   @override
@@ -34,8 +33,7 @@ class _ResultPageState extends State<ResultPage> {
               child: ElevatedButton(
                 child: Icon(playingIcon),
                 onPressed: () {
-                  // TODO (me):화면이 넘어가면 재생 종료 dispose.
-                  // 배속도 가능해야 함. 자동 재생도.
+                  // TODO (me): 배속도 가능해야 함. 자동 재생도.
                   BufferAudioSource source = BufferAudioSource(widget.result);
                   player.setAudioSource(source);
                   if (isPlaying) {
@@ -49,7 +47,6 @@ class _ResultPageState extends State<ResultPage> {
                       playingIcon = Icons.pause_circle_filled_rounded;
                     });
                   }
-
                   isPlaying = !isPlaying;
                 },
               ),
@@ -72,28 +69,5 @@ class _ResultPageState extends State<ResultPage> {
   Future<void> dispose() async {
     super.dispose(); //change here
     await player.stop();
-  }
-}
-
-class BufferAudioSource extends StreamAudioSource {
-  final Uint8List _buffer;
-
-  BufferAudioSource(this._buffer) : super();
-
-  @override
-  Future<StreamAudioResponse> request([int? start, int? end]) {
-    start = start ?? 0;
-    end = end ?? _buffer.length;
-
-    return Future.value(
-      StreamAudioResponse(
-        sourceLength: _buffer.length,
-        contentLength: end - start,
-        offset: start,
-        contentType: 'audio/mpeg',
-        stream:
-            Stream.value(List<int>.from(_buffer.skip(start).take(end - start))),
-      ),
-    );
   }
 }
